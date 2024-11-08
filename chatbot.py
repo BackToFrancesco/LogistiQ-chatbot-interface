@@ -42,8 +42,17 @@ chain = create_prompt | llm
 def chat(input_text, language, transport_cost):
     conversation_history.append(HumanMessage(content=input_text))
     response = chain.invoke({"input": input_text, "language": language, "transport_cost": transport_cost})
-    conversation_history.append(AIMessage(content=response))
-    return response
+    
+    # Extract the content from the response
+    if isinstance(response, dict) and 'content' in response:
+        content = response['content']
+    elif isinstance(response, str):
+        content = response
+    else:
+        content = str(response)  # Fallback to string representation
+    
+    conversation_history.append(AIMessage(content=content))
+    return content
 
 # Main loop for interaction
 language = input("Enter the conversation language: ")
