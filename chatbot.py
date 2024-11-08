@@ -19,23 +19,19 @@ llm = ChatBedrock(
 # Initialize conversation history
 conversation_history = []
 
-# Dictionary for initial message translations
-initial_message_translations = {
-    "english": "Greetings! I'm ChatBot, the AI assistant for LogisticsPro Inc. I'm reaching out to discuss "
-               "contracting transportation services for our upcoming needs. Specifically, we're looking to "
-               "arrange a truck for a shipment from New York to Los Angeles. Our initial budget estimate "
-               "for this route is around $3,000, but we're open to negotiation based on the services you can offer.",
-    "spanish": "¡Saludos! Soy ChatBot, el asistente de IA de LogisticsPro Inc. Me pongo en contacto para discutir "
-               "la contratación de servicios de transporte para nuestras próximas necesidades. Específicamente, "
-               "estamos buscando organizar un camión para un envío de Nueva York a Los Ángeles. Nuestra estimación "
-               "de presupuesto inicial para esta ruta es de alrededor de $3,000, pero estamos abiertos a negociaciones "
-               "basadas en los servicios que pueda ofrecer.",
-    "french": "Bonjour ! Je suis ChatBot, l'assistant IA de LogisticsPro Inc. Je vous contacte pour discuter "
-              "de la contractualisation de services de transport pour nos besoins à venir. Plus précisément, "
-              "nous cherchons à organiser un camion pour une expédition de New York à Los Angeles. Notre estimation "
-              "budgétaire initiale pour cet itinéraire est d'environ 3 000 $, mais nous sommes ouverts à la négociation "
-              "en fonction des services que vous pouvez offrir."
-}
+# Initial message in English
+initial_message_english = ("Greetings! I'm ChatBot, the AI assistant for LogisticsPro Inc. I'm reaching out to discuss "
+                           "contracting transportation services for our upcoming needs. Specifically, we're looking to "
+                           "arrange a truck for a shipment from New York to Los Angeles. Our initial budget estimate "
+                           "for this route is around $3,000, but we're open to negotiation based on the services you can offer.")
+
+def translate_message(message, target_language):
+    """
+    Translate the given message to the target language using the LLM.
+    """
+    prompt = f"Translate the following English message to {target_language}:\n\n{message}\n\nTranslation:"
+    response = llm.invoke(prompt)
+    return response.content if isinstance(response, AIMessage) else str(response)
 
 def create_prompt(input_dict):
     history_str = "\n".join([f"{'Chatbot' if isinstance(msg, AIMessage) else 'Supplier'}: {msg.content}" for msg in conversation_history])
@@ -73,11 +69,11 @@ def chat(input_text, language, transport_cost):
     return content
 
 # Main loop for interaction
-language = input("Enter the conversation language (english/spanish/french): ").lower()
+language = input("Enter the conversation language: ").lower()
 transport_cost = input("Enter the transport cost: ")
 
-# Get the translated initial message
-initial_message = initial_message_translations.get(language, initial_message_translations["english"])
+# Translate the initial message
+initial_message = initial_message_english if language == "english" else translate_message(initial_message_english, language)
 
 print(f"Chatbot: {initial_message}")
 
