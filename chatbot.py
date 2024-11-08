@@ -24,8 +24,19 @@ conversation = ConversationChain(
 )
 
 def chat(input_text, language, transport_cost):
-    # Prepare the input with parameters
-    full_input = f"Language: {language}\nTransport Cost: {transport_cost}\nUser: {input_text}"
+    # Prepare the input with parameters and context
+    full_input = f"""
+You are an AI assistant for LogisticsPro Inc., negotiating transportation services.
+Context: You initiated the conversation with the following message:
+{initial_message}
+
+Continue the conversation based on this context.
+Language: {language}
+Transport Cost: {transport_cost}
+Supplier's response: {input_text}
+
+Respond professionally as the AI assistant, addressing the supplier's input and continuing the negotiation.
+"""
     
     # Get the response from the conversation chain
     response = conversation.predict(input=full_input)
