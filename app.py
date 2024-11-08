@@ -30,7 +30,7 @@ def chat_endpoint():
     global current_offer, conversation_history
     user_input = request.json['message']
     
-    response, agreement_result = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
+    response = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
     conversation_history.append({"role": "human", "content": user_input})
     conversation_history.append({"role": "assistant", "content": response})
 
@@ -38,17 +38,8 @@ def chat_endpoint():
     if new_offer is not None:
         current_offer = new_offer
 
-    if agreement_result["agreement_reached"]:
-        final_deal = {
-            "final_price": agreement_result["final_price"] or current_offer,
-            "origin": ORIGIN,
-            "destination": DESTINATION,
-            "explanation": agreement_result["explanation"]
-        }
-        return jsonify({"message": response, "end_chat": True, "agreement": True, "final_deal": final_deal})
-
     if current_offer > max_price:
-        return jsonify({"message": response, "end_chat": True, "agreement": False})
+        return jsonify({"message": response, "end_chat": True})
 
     return jsonify({"message": response})
 
