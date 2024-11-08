@@ -1,8 +1,9 @@
 import boto3
 from langchain_aws import ChatBedrock
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
+from langchain.memory import ChatMessageHistory
 from langchain.schema import HumanMessage, AIMessage
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables.history import RunnableWithMessageHistory
 
 # Set up Amazon Bedrock client
 bedrock_client = boto3.client(
@@ -18,30 +19,35 @@ llm = ChatBedrock(
 )
 
 # Set up the conversation chain
-conversation = ConversationChain(
-    llm=llm,
-    memory=ConversationBufferMemory(return_messages=True)
-)
-
-def chat(input_text, language, transport_cost):
-    # Prepare the input with parameters and context
-    full_input = f"""
+def create_prompt(input_dict):
+    return f"""
 You are an AI assistant for LogisticsPro Inc., negotiating transportation services.
 Context: You initiated the conversation with the following message:
 {initial_message}
 
 Continue the conversation based on this context.
-Language: {language}
-Transport Cost: {transport_cost}
-Supplier's response: {input_text}
+Language: {input_dict['language']}
+Transport Cost: {input_dict['transport_cost']}
+Supplier's response: {input_dict['input']}
 
 Respond professionally as the AI assistant, addressing the supplier's input and continuing the negotiation.
 """
-    
-    # Get the response from the conversation chain
-    response = conversation.predict(input=full_input)
-    
-    return response
+
+chain = create_prompt | llm
+
+conversation = RunnableWithMessageHistory(
+    chain,
+    lambda session_id: ChatMessageHistory(),
+    input_messages_key="input",
+    history_messages_key="history",
+)
+
+def chat(input_text, language, transport_cost):
+    response = conversation.invoke(
+        {"input": input_text, "language": language, "transport_cost": transport_cost},
+        config={"configurable": {"session_id": "chat_session"}}
+    )
+    return response.content
 
 # Main loop for interaction
 language = input("Enter the conversation language: ")
@@ -57,7 +63,7 @@ initial_message = (
 print(f"Chatbot: {initial_message}")
 
 # Add the initial message to the conversation memory
-conversation.memory.chat_memory.add_ai_message(initial_message)
+conversation.get_session_history("chat_session").add_ai_message(initial_message)
 
 while True:
     user_input = input("Supplier: ")
