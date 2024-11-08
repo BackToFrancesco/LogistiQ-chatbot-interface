@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from chatbot import chat, get_initial_message_english, LANGUAGE, ORIGIN, DESTINATION
+from chatbot import chat, get_initial_message_english, LANGUAGE, ORIGIN, DESTINATION, translate_message
 
 app = Flask(__name__)
 
@@ -20,7 +20,7 @@ def start_chat():
     current_offer = starting_price
     conversation_history = []
 
-    initial_message = get_initial_message_english(starting_price, ORIGIN, DESTINATION)
+    initial_message = translate_message(get_initial_message_english(starting_price, ORIGIN, DESTINATION), target_language=LANGUAGE)
     conversation_history.append({"role": "assistant", "content": initial_message})
 
     return jsonify({"message": initial_message})

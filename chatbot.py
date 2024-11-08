@@ -4,7 +4,7 @@ from langchain.schema import HumanMessage, AIMessage
 from langchain_core.runnables import RunnablePassthrough
 
 # Constants
-LANGUAGE = "english"
+LANGUAGE = "Italian"
 ORIGIN = "Bolzano"
 DESTINATION = "Munich"
 
