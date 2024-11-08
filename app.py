@@ -70,15 +70,18 @@ def extract_offer_from_response(response):
     return None
 
 def analyze_conversation_for_final_price(conversation_history):
-    # Prepare the conversation history for the LLM
-    conversation_text = "\n".join([f"{'Chatbot' if msg['role'] == 'assistant' else 'Human'}: {msg['content']}" for msg in conversation_history])
+    # Get the latest AI assistant message
+    latest_ai_message = next((msg['content'] for msg in reversed(conversation_history) if msg['role'] == 'assistant'), None)
+    
+    if not latest_ai_message:
+        return None
     
     prompt = f"""
-    Analyze the following conversation and extract the final agreed price for the transportation service.
+    Analyze the following message and extract the final agreed price for the transportation service.
     Only return the numeric value of the final price, without any currency symbols or additional text.
 
-    Conversation:
-    {conversation_text}
+    Message:
+    {latest_ai_message}
 
     Final agreed price:
     """
