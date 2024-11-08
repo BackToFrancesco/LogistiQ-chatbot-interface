@@ -37,7 +37,6 @@ chain = create_prompt | llm
 
 conversation = RunnableWithMessageHistory(
     chain,
-    lambda session_id: ChatMessageHistory(),
     input_messages_key="input",
     history_messages_key="history",
 )
