@@ -19,6 +19,24 @@ llm = ChatBedrock(
 # Initialize conversation history
 conversation_history = []
 
+# Dictionary for initial message translations
+initial_message_translations = {
+    "english": "Greetings! I'm ChatBot, the AI assistant for LogisticsPro Inc. I'm reaching out to discuss "
+               "contracting transportation services for our upcoming needs. Specifically, we're looking to "
+               "arrange a truck for a shipment from New York to Los Angeles. Our initial budget estimate "
+               "for this route is around $3,000, but we're open to negotiation based on the services you can offer.",
+    "spanish": "¡Saludos! Soy ChatBot, el asistente de IA de LogisticsPro Inc. Me pongo en contacto para discutir "
+               "la contratación de servicios de transporte para nuestras próximas necesidades. Específicamente, "
+               "estamos buscando organizar un camión para un envío de Nueva York a Los Ángeles. Nuestra estimación "
+               "de presupuesto inicial para esta ruta es de alrededor de $3,000, pero estamos abiertos a negociaciones "
+               "basadas en los servicios que pueda ofrecer.",
+    "french": "Bonjour ! Je suis ChatBot, l'assistant IA de LogisticsPro Inc. Je vous contacte pour discuter "
+              "de la contractualisation de services de transport pour nos besoins à venir. Plus précisément, "
+              "nous cherchons à organiser un camion pour une expédition de New York à Los Angeles. Notre estimation "
+              "budgétaire initiale pour cet itinéraire est d'environ 3 000 $, mais nous sommes ouverts à la négociation "
+              "en fonction des services que vous pouvez offrir."
+}
+
 def create_prompt(input_dict):
     history_str = "\n".join([f"{'Chatbot' if isinstance(msg, AIMessage) else 'Supplier'}: {msg.content}" for msg in conversation_history])
     return f"""
@@ -55,15 +73,11 @@ def chat(input_text, language, transport_cost):
     return content
 
 # Main loop for interaction
-language = input("Enter the conversation language: ")
+language = input("Enter the conversation language (english/spanish/french): ").lower()
 transport_cost = input("Enter the transport cost: ")
 
-initial_message = (
-    "Greetings! I'm ChatBot, the AI assistant for LogisticsPro Inc. I'm reaching out to discuss "
-    "contracting transportation services for our upcoming needs. Specifically, we're looking to "
-    "arrange a truck for a shipment from New York to Los Angeles. Our initial budget estimate "
-    "for this route is around $3,000, but we're open to negotiation based on the services you can offer. "
-)
+# Get the translated initial message
+initial_message = initial_message_translations.get(language, initial_message_translations["english"])
 
 print(f"Chatbot: {initial_message}")
 
