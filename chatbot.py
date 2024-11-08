@@ -19,11 +19,12 @@ llm = ChatBedrock(
 # Initialize conversation history
 conversation_history = []
 
-# Initial message in English
-initial_message_english = ("Greetings! I'm ChatBot, the AI assistant for LogisticsPro Inc. I'm reaching out to discuss "
-                           "contracting transportation services for our upcoming needs. Specifically, we're looking to "
-                           "arrange a truck for a shipment from New York to Los Angeles. Our initial budget estimate "
-                           "for this route is around $3,000, but we're open to negotiation based on the services you can offer.")
+# Function to generate the initial message in English
+def get_initial_message_english(initial_price):
+    return (f"Greetings! I'm ChatBot, the AI assistant for LogisticsPro Inc. I'm reaching out to discuss "
+            f"contracting transportation services for our upcoming needs. Specifically, we're looking to "
+            f"arrange a truck for a shipment from New York to Los Angeles. Our initial budget estimate "
+            f"for this route is around ${initial_price}, but we're open to negotiation based on the services you can offer.")
 
 def translate_message(message, target_language):
     """
@@ -71,8 +72,10 @@ def chat(input_text, language, transport_cost):
 # Main loop for interaction
 language = input("Enter the conversation language: ").lower()
 transport_cost = input("Enter the transport cost: ")
+initial_price = input("Enter the initial budget estimate: ")
 
-# Translate the initial message
+# Generate and translate the initial message
+initial_message_english = get_initial_message_english(initial_price)
 initial_message = initial_message_english if language == "english" else translate_message(initial_message_english, language)
 
 print(f"Chatbot: {initial_message}")
