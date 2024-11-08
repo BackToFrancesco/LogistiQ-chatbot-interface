@@ -61,7 +61,7 @@ Negotiation Strategy:
 
 Respond professionally as the AI assistant, addressing the supplier's input and continuing the negotiation.
 Make counter-offers when appropriate, and be prepared to end the negotiation if the maximum price is exceeded.
-Always include your current offer in your response, formatted as: "Current offer: $X".
+Always include your current offer in your response".
 """
 
 chain = create_prompt | llm
