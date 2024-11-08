@@ -41,10 +41,6 @@ initial_message = (
     "contracting transportation services for our upcoming needs. Specifically, we're looking to "
     "arrange a truck for a shipment from New York to Los Angeles. Our initial budget estimate "
     "for this route is around $3,000, but we're open to negotiation based on the services you can offer. "
-    "Could you please provide information on your available trucks, estimated delivery time, and pricing "
-    "for this route? We're particularly interested in reliability, tracking capabilities, and any "
-    "special handling services you might offer for sensitive cargo. Thank you for your time, and I look "
-    "forward to discussing how we can work together to meet our transportation needs."
 )
 
 print(f"Chatbot: {initial_message}")
