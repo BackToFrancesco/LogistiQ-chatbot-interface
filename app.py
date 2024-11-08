@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from chatbot import chat, get_initial_message_english, LANGUAGE, ORIGIN, DESTINATION, translate_message
+from chatbot import chat, get_initial_message_english, LANGUAGE, ORIGIN, DESTINATION, translate_message, llm
 
 app = Flask(__name__)
 
@@ -34,7 +34,20 @@ def chat_endpoint():
         final_message = translate_message("Great! The negotiation has concluded successfully. We are now waiting for approval from the company to proceed with the payment. Thank you for your cooperation.", LANGUAGE)
         conversation_history.append({"role": "human", "content": user_input})
         conversation_history.append({"role": "assistant", "content": final_message})
-        return jsonify({"message": final_message, "end_chat": True, "agreement_reached": True})
+        
+        # Analyze the conversation to get the final agreed price
+        final_price = analyze_conversation_for_final_price(conversation_history)
+        
+        return jsonify({
+            "message": final_message,
+            "end_chat": True,
+            "agreement_reached": True,
+            "final_deal": {
+                "price": final_price,
+                "origin": ORIGIN,
+                "destination": DESTINATION
+            }
+        })
     
     response = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
     conversation_history.append({"role": "human", "content": user_input})
@@ -55,6 +68,30 @@ def extract_offer_from_response(response):
     if match:
         return float(match.group(1))
     return None
+
+def analyze_conversation_for_final_price(conversation_history):
+    # Prepare the conversation history for the LLM
+    conversation_text = "\n".join([f"{'Chatbot' if msg['role'] == 'assistant' else 'Human'}: {msg['content']}" for msg in conversation_history])
+    
+    prompt = f"""
+    Analyze the following conversation and extract the final agreed price for the transportation service.
+    Only return the numeric value of the final price, without any currency symbols or additional text.
+
+    Conversation:
+    {conversation_text}
+
+    Final agreed price:
+    """
+
+    response = llm.invoke(prompt)
+    
+    # Extract the numeric value from the response
+    import re
+    price_match = re.search(r'\d+(\.\d{2})?', response.content)
+    if price_match:
+        return float(price_match.group())
+    else:
+        return None
 
 if __name__ == '__main__':
     app.run(debug=True)
