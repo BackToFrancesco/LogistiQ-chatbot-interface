@@ -33,6 +33,12 @@
             padding: 5px;
             margin-bottom: 10px;
         }
+        .agreement {
+            background-color: #e6ffe6;
+            border: 1px solid #4CAF50;
+            padding: 10px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -85,6 +91,9 @@
                     if (response.end_chat) {
                         $('#user-input').prop('disabled', true);
                         $('button').prop('disabled', true);
+                        if (response.agreement) {
+                            displayFinalDeal(response.final_deal);
+                        }
                     }
                 }
             });
@@ -92,6 +101,20 @@
 
         function addMessage(message, role) {
             $('#chat-container').append(`<div class="message ${role}">${role === 'assistant' ? 'Chatbot' : 'You'}: ${message}</div>`);
+            $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
+        }
+
+        function displayFinalDeal(finalDeal) {
+            const dealMessage = `
+                <div class="message agreement">
+                    <strong>Agreement Reached!</strong><br>
+                    Final Price: $${finalDeal.final_price}<br>
+                    Origin: ${finalDeal.origin}<br>
+                    Destination: ${finalDeal.destination}<br>
+                    <em>Explanation: ${finalDeal.explanation}</em>
+                </div>
+            `;
+            $('#chat-container').append(dealMessage);
             $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
         }
 
