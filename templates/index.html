@@ -28,6 +28,10 @@
         .human {
             color: green;
         }
+        .system {
+            color: red;
+            font-weight: bold;
+        }
         #user-input {
             width: 100%;
             padding: 5px;
@@ -85,13 +89,17 @@
                     if (response.end_chat) {
                         $('#user-input').prop('disabled', true);
                         $('button').prop('disabled', true);
+                        if (response.agreement_reached) {
+                            addMessage("The negotiation has concluded successfully. Waiting for company approval to proceed with payment.", 'system');
+                        }
                     }
                 }
             });
         }
 
         function addMessage(message, role) {
-            $('#chat-container').append(`<div class="message ${role}">${role === 'assistant' ? 'Chatbot' : 'You'}: ${message}</div>`);
+            const roleText = role === 'assistant' ? 'Chatbot' : (role === 'human' ? 'You' : 'System');
+            $('#chat-container').append(`<div class="message ${role}">${roleText}: ${message}</div>`);
             $('#chat-container').scrollTop($('#chat-container')[0].scrollHeight);
         }
 
