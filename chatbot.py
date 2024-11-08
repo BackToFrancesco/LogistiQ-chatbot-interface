@@ -37,9 +37,14 @@ language = input("Enter the conversation language: ")
 transport_cost = input("Enter the transport cost: ")
 
 initial_message = (
-    "Hello! I'm ChatBot from LogisticsPro Inc. I'm reaching out to discuss "
-    "contracting the price of transportation services. I'm looking for a "
-    "truck for the trip from New York to Los Angeles. I want to offer you 100€"
+    "Greetings! I'm ChatBot, the AI assistant for LogisticsPro Inc. I'm reaching out to discuss "
+    "contracting transportation services for our upcoming needs. Specifically, we're looking to "
+    "arrange a truck for a shipment from New York to Los Angeles. Our initial budget estimate "
+    "for this route is around $3,000, but we're open to negotiation based on the services you can offer. "
+    "Could you please provide information on your available trucks, estimated delivery time, and pricing "
+    "for this route? We're particularly interested in reliability, tracking capabilities, and any "
+    "special handling services you might offer for sensitive cargo. Thank you for your time, and I look "
+    "forward to discussing how we can work together to meet our transportation needs."
 )
 
 print(f"Chatbot: {initial_message}")
