@@ -12,7 +12,7 @@ bedrock_client = boto3.client(
 # Initialize the Bedrock LLM
 llm = ChatBedrock(
     client=bedrock_client,
-    model_id="anthropic.claude-v2",
+    model_id="anthropic.claude-3-sonnet-20240229-v1:0",
     model_kwargs={"temperature": 0.7}
 )
 
@@ -29,7 +29,7 @@ def translate_message(message, target_language):
     """
     Translate the given message to the target language using the LLM.
     """
-    prompt = f"Translate the following English message to {target_language}:\n\n{message}\n\nTranslation:"
+    prompt = f"Translate the following English message to {target_language}:\n\n{message}\n\n Respond with only the translated text."
     response = llm.invoke(prompt)
     return response.content if isinstance(response, AIMessage) else str(response)
 
@@ -56,14 +56,14 @@ chain = create_prompt | llm
 def chat(input_text, language, transport_cost):
     conversation_history.append(HumanMessage(content=input_text))
     response = chain.invoke({"input": input_text, "language": language, "transport_cost": transport_cost})
-    
-    # Extract the content from the response
-    if isinstance(response, dict) and 'content' in response:
-        content = response['content']
-    elif isinstance(response, str):
-        content = response
-    else:
-        content = str(response)  # Fallback to string representation
+    content = response.content
+    # # Extract the content from the response
+    # if isinstance(response, dict) and 'content' in response:
+    #     content = response['content']
+    # elif isinstance(response, str):
+    #     content = response
+    # else:
+    #     content = str(response)  # Fallback to string representation
     
     conversation_history.append(AIMessage(content=content))
     return content
