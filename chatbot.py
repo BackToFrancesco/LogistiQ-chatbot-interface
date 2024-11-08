@@ -1,9 +1,7 @@
 import boto3
 from langchain_aws import ChatBedrock
-from langchain.memory import ChatMessageHistory
 from langchain.schema import HumanMessage, AIMessage
 from langchain_core.runnables import RunnablePassthrough
-from langchain_core.runnables.history import RunnableWithMessageHistory
 
 # Set up Amazon Bedrock client
 bedrock_client = boto3.client(
@@ -18,12 +16,18 @@ llm = ChatBedrock(
     model_kwargs={"temperature": 0.7}
 )
 
-# Set up the conversation chain
+# Initialize conversation history
+conversation_history = []
+
 def create_prompt(input_dict):
+    history_str = "\n".join([f"{'Chatbot' if isinstance(msg, AIMessage) else 'Supplier'}: {msg.content}" for msg in conversation_history])
     return f"""
 You are an AI assistant for LogisticsPro Inc., negotiating transportation services.
 Context: You initiated the conversation with the following message:
 {initial_message}
+
+Conversation history:
+{history_str}
 
 Continue the conversation based on this context.
 Language: {input_dict['language']}
@@ -35,18 +39,11 @@ Respond professionally as the AI assistant, addressing the supplier's input and 
 
 chain = create_prompt | llm
 
-conversation = RunnableWithMessageHistory(
-    chain,
-    input_messages_key="input",
-    history_messages_key="history",
-)
-
 def chat(input_text, language, transport_cost):
-    response = conversation.invoke(
-        {"input": input_text, "language": language, "transport_cost": transport_cost},
-        config={"configurable": {"session_id": "chat_session"}}
-    )
-    return response.content
+    conversation_history.append(HumanMessage(content=input_text))
+    response = chain.invoke({"input": input_text, "language": language, "transport_cost": transport_cost})
+    conversation_history.append(AIMessage(content=response))
+    return response
 
 # Main loop for interaction
 language = input("Enter the conversation language: ")
@@ -61,8 +58,8 @@ initial_message = (
 
 print(f"Chatbot: {initial_message}")
 
-# Add the initial message to the conversation memory
-conversation.get_session_history("chat_session").add_ai_message(initial_message)
+# Add the initial message to the conversation history
+conversation_history.append(AIMessage(content=initial_message))
 
 while True:
     user_input = input("Supplier: ")
