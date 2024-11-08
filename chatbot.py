@@ -1,16 +1,16 @@
 import boto3
-from langchain.llms import Bedrock
+from langchain_aws import ChatBedrock
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 
 # Set up Amazon Bedrock client
 bedrock_client = boto3.client(
     service_name='bedrock-runtime',
-    region_name='your-region'  # e.g., 'us-west-2'
+    region_name='us-west-2'  # e.g., 'us-west-2'
 )
 
 # Initialize the Bedrock LLM
-llm = Bedrock(
+llm = ChatBedrock(
     client=bedrock_client,
     model_id="anthropic.claude-v2",  # or another model available in Bedrock
     model_kwargs={"temperature": 0.7, "max_tokens_to_sample": 500}
