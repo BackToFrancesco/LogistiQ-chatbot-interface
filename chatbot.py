@@ -39,7 +39,7 @@ def translate_message(message, target_language):
     response = llm.invoke(prompt)
     return response.content if isinstance(response, AIMessage) else str(response)
 
-def create_prompt(input_dict):
+def create_prompt(input_dict, initial_message):
     history_str = "\n".join([f"{'Chatbot' if isinstance(msg, AIMessage) else 'Supplier'}: {msg.content}" for msg in conversation_history])
     return f"""
 You are an AI assistant for LogisticsPro Inc., negotiating transportation services.
@@ -69,11 +69,10 @@ Make counter-offers when appropriate, and be prepared to end the negotiation if 
 Always include your current offer in your response".
 """
 
-chain = create_prompt | llm
-
 def chat(input_text, language, transport_cost, origin, destination, starting_price, max_price):
     conversation_history.append(HumanMessage(content=input_text))
-    response = chain.invoke({
+    initial_message = get_initial_message_english(starting_price, origin, destination)
+    prompt = create_prompt({
         "input": input_text,
         "language": language,
         "transport_cost": transport_cost,
@@ -81,8 +80,9 @@ def chat(input_text, language, transport_cost, origin, destination, starting_pri
         "destination": destination,
         "starting_price": starting_price,
         "max_price": max_price
-    })
-    content = response.content
+    }, initial_message)
+    response = llm.invoke(prompt)
+    content = response.content if isinstance(response, AIMessage) else str(response)
     conversation_history.append(AIMessage(content=content))
     return content
 
