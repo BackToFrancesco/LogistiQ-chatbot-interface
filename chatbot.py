@@ -38,9 +38,8 @@ transport_cost = input("Enter the transport cost: ")
 
 initial_message = (
     "Hello! I'm ChatBot from LogisticsPro Inc. I'm reaching out to discuss "
-    "contracting the price of a truck for our company. We're looking to optimize "
-    "our transportation costs and are interested in your fleet offerings. "
-    "Could you provide some information about your available trucks and pricing options?"
+    "contracting the price of transportation services. I'm looking for a "
+    "truck for the trip from New York to Los Angeles. I want to offer you 100€"
 )
 
 print(f"Chatbot: {initial_message}")
