@@ -20,11 +20,11 @@ llm = ChatBedrock(
 conversation_history = []
 
 # Function to generate the initial message in English
-def get_initial_message_english(initial_price):
+def get_initial_message_english(initial_price, origin, destination):
     return (f"Greetings! I'm ChatBot, the AI assistant for LogisticsPro Inc. I'm reaching out to discuss "
             f"contracting transportation services for our upcoming needs. Specifically, we're looking to "
-            f"arrange a truck for a shipment from New York to Los Angeles. Our initial budget estimate "
-            f"for this route is around ${initial_price}, but we're open to negotiation based on the services you can offer.")
+            f"arrange a truck for a shipment from {origin} to {destination}. Our initial budget estimate "
+            f"for this route is ${initial_price}, but we're open to negotiation based on the services you can offer.")
 
 def translate_message(message, target_language):
     """
@@ -46,37 +46,57 @@ Conversation history:
 
 Continue the conversation based on this context.
 Language: {input_dict['language']}
-Transport Cost: {input_dict['transport_cost']}
-Maximum Transport Cost: {initial_price}
+Origin: {input_dict['origin']}
+Destination: {input_dict['destination']}
+Current Offer: {input_dict['transport_cost']}
+Starting Price: {input_dict['starting_price']}
+Maximum Price: {input_dict['max_price']}
 Supplier's response: {input_dict['input']}
 
+Negotiation Strategy:
+1. Start with the initial price of {input_dict['starting_price']}.
+2. Make counter-offers based on the supplier's responses.
+3. Gradually increase your offer if necessary, but do not exceed {input_dict['max_price']}.
+4. If the supplier doesn't accept a price at or below {input_dict['max_price']}, end the negotiation.
+
 Respond professionally as the AI assistant, addressing the supplier's input and continuing the negotiation.
+Make counter-offers when appropriate, and be prepared to end the negotiation if the maximum price is exceeded.
+Always include your current offer in your response, formatted as: "Current offer: $X".
 """
 
 chain = create_prompt | llm
 
-def chat(input_text, language, transport_cost):
+def chat(input_text, language, transport_cost, origin, destination, starting_price, max_price):
     conversation_history.append(HumanMessage(content=input_text))
-    response = chain.invoke({"input": input_text, "language": language, "transport_cost": transport_cost})
+    response = chain.invoke({
+        "input": input_text,
+        "language": language,
+        "transport_cost": transport_cost,
+        "origin": origin,
+        "destination": destination,
+        "starting_price": starting_price,
+        "max_price": max_price
+    })
     content = response.content
-    # # Extract the content from the response
-    # if isinstance(response, dict) and 'content' in response:
-    #     content = response['content']
-    # elif isinstance(response, str):
-    #     content = response
-    # else:
-    #     content = str(response)  # Fallback to string representation
-    
     conversation_history.append(AIMessage(content=content))
     return content
 
+def extract_offer_from_response(response):
+    import re
+    match = re.search(r"Current offer: \$(\d+(?:\.\d{2})?)", response)
+    if match:
+        return float(match.group(1))
+    return None
+
 # Main loop for interaction
 language = input("Enter the conversation language: ").lower()
-transport_cost = input("Enter the transport cost: ")
-initial_price = input("Enter the initial budget estimate: ")
+origin = input("Enter the origin city: ")
+destination = input("Enter the destination city: ")
+starting_price = float(input("Enter the starting price: "))
+max_price = float(input("Enter the maximum price: "))
 
 # Generate and translate the initial message
-initial_message_english = get_initial_message_english(initial_price)
+initial_message_english = get_initial_message_english(starting_price, origin, destination)
 initial_message = initial_message_english if language == "english" else translate_message(initial_message_english, language)
 
 print(f"Chatbot: {initial_message}")
@@ -84,11 +104,21 @@ print(f"Chatbot: {initial_message}")
 # Add the initial message to the conversation history
 conversation_history.append(AIMessage(content=initial_message))
 
+current_offer = starting_price
+
 while True:
     user_input = input("Supplier: ")
     if user_input.lower() in ['quit', 'exit', 'bye']:
         print("Chatbot: Goodbye!")
         break
     
-    response = chat(user_input, language, transport_cost)
+    response = chat(user_input, language, current_offer, origin, destination, starting_price, max_price)
     print(f"Chatbot: {response}")
+    
+    new_offer = extract_offer_from_response(response)
+    if new_offer is not None:
+        current_offer = new_offer
+    
+    if current_offer > max_price:
+        print("Chatbot: I'm sorry, but we cannot exceed our maximum budget. Thank you for your time.")
+        break
