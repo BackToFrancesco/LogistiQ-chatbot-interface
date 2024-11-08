@@ -3,6 +3,11 @@ from langchain_aws import ChatBedrock
 from langchain.schema import HumanMessage, AIMessage
 from langchain_core.runnables import RunnablePassthrough
 
+# Constants
+LANGUAGE = "english"
+ORIGIN = "Bolzano"
+DESTINATION = "Munich"
+
 # Set up Amazon Bedrock client
 bedrock_client = boto3.client(
     service_name='bedrock-runtime',
@@ -89,15 +94,12 @@ def extract_offer_from_response(response):
     return None
 
 # Main loop for interaction
-language = input("Enter the conversation language: ").lower()
-origin = input("Enter the origin city: ")
-destination = input("Enter the destination city: ")
 starting_price = float(input("Enter the starting price: "))
 max_price = float(input("Enter the maximum price: "))
 
 # Generate and translate the initial message
-initial_message_english = get_initial_message_english(starting_price, origin, destination)
-initial_message = initial_message_english if language == "english" else translate_message(initial_message_english, language)
+initial_message_english = get_initial_message_english(starting_price, ORIGIN, DESTINATION)
+initial_message = initial_message_english if LANGUAGE == "english" else translate_message(initial_message_english, LANGUAGE)
 
 print(f"Chatbot: {initial_message}")
 
@@ -112,7 +114,7 @@ while True:
         print("Chatbot: Goodbye!")
         break
     
-    response = chat(user_input, language, current_offer, origin, destination, starting_price, max_price)
+    response = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
     print(f"Chatbot: {response}")
     
     new_offer = extract_offer_from_response(response)
