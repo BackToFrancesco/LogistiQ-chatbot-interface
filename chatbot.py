@@ -36,10 +36,20 @@ def chat(input_text, language, transport_cost):
 language = input("Enter the conversation language: ")
 transport_cost = input("Enter the transport cost: ")
 
-print("Chatbot: Hello! How can I assist you today?")
+initial_message = (
+    "Hello! I'm ChatBot from LogisticsPro Inc. I'm reaching out to discuss "
+    "contracting the price of a truck for our company. We're looking to optimize "
+    "our transportation costs and are interested in your fleet offerings. "
+    "Could you provide some information about your available trucks and pricing options?"
+)
+
+print(f"Chatbot: {initial_message}")
+
+# Add the initial message to the conversation memory
+conversation.memory.chat_memory.add_ai_message(initial_message)
 
 while True:
-    user_input = input("You: ")
+    user_input = input("Supplier: ")
     if user_input.lower() in ['quit', 'exit', 'bye']:
         print("Chatbot: Goodbye!")
         break
