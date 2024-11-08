@@ -47,6 +47,7 @@ Conversation history:
 Continue the conversation based on this context.
 Language: {input_dict['language']}
 Transport Cost: {input_dict['transport_cost']}
+Maximum Transport Cost: {initial_price}
 Supplier's response: {input_dict['input']}
 
 Respond professionally as the AI assistant, addressing the supplier's input and continuing the negotiation.
