@@ -93,34 +93,4 @@ def extract_offer_from_response(response):
         return float(match.group(1))
     return None
 
-# Main loop for interaction
-starting_price = float(input("Enter the starting price: "))
-max_price = float(input("Enter the maximum price: "))
-
-# Generate and translate the initial message
-initial_message_english = get_initial_message_english(starting_price, ORIGIN, DESTINATION)
-initial_message = initial_message_english if LANGUAGE == "english" else translate_message(initial_message_english, LANGUAGE)
-
-print(f"Chatbot: {initial_message}")
-
-# Add the initial message to the conversation history
-conversation_history.append(AIMessage(content=initial_message))
-
-current_offer = starting_price
-
-while True:
-    user_input = input("Supplier: ")
-    if user_input.lower() in ['quit', 'exit', 'bye']:
-        print("Chatbot: Goodbye!")
-        break
-    
-    response = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
-    print(f"Chatbot: {response}")
-    
-    new_offer = extract_offer_from_response(response)
-    if new_offer is not None:
-        current_offer = new_offer
-    
-    if current_offer > max_price:
-        print("Chatbot: I'm sorry, but we cannot exceed our maximum budget. Thank you for your time.")
-        break
+# The main loop and related code has been removed as it's now handled by the Flask app
