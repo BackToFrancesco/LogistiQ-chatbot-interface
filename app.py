@@ -38,7 +38,7 @@ def chat_endpoint():
         # Analyze the conversation to get the final agreed price
         final_price = analyze_conversation_for_final_price(conversation_history)
         
-        return jsonify({
+        return_value = jsonify({
             "message": final_message,
             "end_chat": True,
             "agreement_reached": True,
@@ -48,6 +48,11 @@ def chat_endpoint():
                 "destination": DESTINATION
             }
         })
+        
+        print("Return value when user accepts:")
+        print(return_value.get_data(as_text=True))
+        
+        return return_value
     
     response = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
     conversation_history.append({"role": "human", "content": user_input})
