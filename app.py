@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from chatbot import chat, get_initial_message_english, LANGUAGE, ORIGIN, DESTINATION, translate_message, ChatbotResponse
+import urllib.parse
+import time
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Add this line for session management
@@ -100,13 +102,28 @@ def receive_params():
 
     # Start a web window locally to chat with the bot
     def open_browser():
-        # the chat that I start should have the above parameters passed in input
-        webbrowser.open_new('http://localhost:8080')
+        # Pass the parameters to the chat interface
+        params = urllib.parse.urlencode({
+            'starting_price': session['starting_price'],
+            'max_price': session['max_price'],
+            'origin': session['origin'],
+            'destination': session['destination'],
+            'chat_initiated': 'true'
+        })
+        webbrowser.open_new(f'http://localhost:8080/?{params}')
 
     threading.Timer(1.0, open_browser).start()
     
-    # This should return only when conversation end e.g. user accepts or declines
-    return jsonify({"message": "Parameters received. Chat window opening..."})
+    # Wait for the chat to complete
+    while not session.get('chat_completed', False):
+        time.sleep(1)
+    
+    # Return the final result
+    final_price = analyze_conversation_for_final_price(conversation_history)
+    return jsonify({
+        "final_price": final_price,
+        "conversation_history": conversation_history
+    })
 
 @app.route('/get_chat_result', methods=['GET'])
 def get_chat_result():
