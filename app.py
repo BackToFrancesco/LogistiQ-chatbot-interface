@@ -87,10 +87,10 @@ def receive_params():
     print("Received params:", data)
     
     # Store parameters in session
-    session['starting_price'] = float(data.get('starting_price', 0))
-    session['max_price'] = float(data.get('max_price', 0))
-    session['origin'] = data.get('origin', ORIGIN)
-    session['destination'] = data.get('destination', DESTINATION)
+    session['starting_price'] = float(data.get('minimum_price', 0))
+    session['max_price'] = float(data.get('maximum_price', 0))
+    session['origin'] = data.get('load_city', ORIGIN)
+    session['destination'] = data.get('unload_city', DESTINATION)
     
     # Redirect to the main page
     return redirect(url_for('index'))
