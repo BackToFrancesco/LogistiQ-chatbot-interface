@@ -1,10 +1,15 @@
 import boto3
+import logging
 from langchain_aws import ChatBedrock
 from langchain.schema import HumanMessage, AIMessage
 from langchain_core.runnables import RunnablePassthrough
 from pydantic import BaseModel, Field
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
+
+# Set up logging for LangChain
+logging.basicConfig()
+logging.getLogger("langchain").setLevel(logging.DEBUG)
 
 # Constants
 LANGUAGE = "Italian"
