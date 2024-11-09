@@ -108,7 +108,7 @@ def receive_params():
     max_price = float(data.get('maximum_price', 0))
     origin = data.get('load_city', ORIGIN)
     destination = data.get('unload_city', DESTINATION)
-    LANGUAGE = data.get('language', LANGUAGE)  # Update the global LANGUAGE
+    LANGUAGE = data['rank'][0]['language'] if data.get('rank') and data['rank'] else LANGUAGE  # Update the global LANGUAGE
     print(f"Starting price: {starting_price}, max price: {max_price}, origin: {origin}, destination: {destination}, language: {LANGUAGE}")
     
     # Reset chat_completed flag and final_price
