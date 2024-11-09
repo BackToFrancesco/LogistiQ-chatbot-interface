@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 from chatbot import chat, get_initial_message_english, LANGUAGE, ORIGIN, DESTINATION, translate_message, ChatbotResponse
 import urllib.parse
 import time
+import threading
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Add this line for session management
@@ -13,6 +14,8 @@ max_price = 0
 final_price = 0  # Initialize final_price
 origin = ORIGIN
 destination = DESTINATION
+chat_completed = False
+chat_completed_lock = threading.Lock()
 
 @app.route('/')
 def index():
@@ -39,7 +42,7 @@ def start_chat():
 
 @app.route('/chat', methods=['POST'])
 def chat_endpoint():
-    global current_offer, conversation_history, final_price
+    global current_offer, conversation_history, final_price, chat_completed
     user_input = request.json['message']
     
     if user_input.lower().strip() == "accept":
@@ -49,7 +52,7 @@ def chat_endpoint():
         print(f"final message: {final_message}")
         
         return_value = jsonify({
-            "message": final_message,  # Add this line
+            "message": final_message,
             "end_chat": True,
             "agreement_reached": True,
             "price": final_price,
@@ -57,7 +60,8 @@ def chat_endpoint():
         
         print("Return value when user accepts:")
         print(return_value.get_data(as_text=True))
-        session['chat_completed'] = True
+        with chat_completed_lock:
+            chat_completed = True
         
         return return_value
     
@@ -89,26 +93,29 @@ import threading
 
 @app.route('/receive_params', methods=['POST'])
 def receive_params():
+    global chat_completed
     data = request.json
     print("Received params:", data)
     
-    # Store parameters in session
-    session['starting_price'] = float(data.get('minimum_price', 0))
-    session['max_price'] = float(data.get('maximum_price', 0))
-    session['origin'] = data.get('load_city', ORIGIN)
-    session['destination'] = data.get('unload_city', DESTINATION)
-    session['chat_initiated'] = True
-    session['chat_completed'] = False
-    session['requester_id'] = data.get('requester_id')
+    # Store parameters in global variables
+    global starting_price, max_price, origin, destination
+    starting_price = float(data.get('minimum_price', 0))
+    max_price = float(data.get('maximum_price', 0))
+    origin = data.get('load_city', ORIGIN)
+    destination = data.get('unload_city', DESTINATION)
+    
+    # Reset chat_completed flag
+    with chat_completed_lock:
+        chat_completed = False
 
     # Start a web window locally to chat with the bot
     def open_browser(data):
         # Pass the parameters to the chat interface
         params = urllib.parse.urlencode({
-            'starting_price': float(data.get('minimum_price', 0)),
-            'max_price': float(data.get('maximum_price', 0)),
-            'origin': data.get('load_city', ORIGIN),
-            'destination': data.get('unload_city', DESTINATION),
+            'starting_price': starting_price,
+            'max_price': max_price,
+            'origin': origin,
+            'destination': destination,
             'chat_initiated': 'true'
         })
         webbrowser.open_new(f'http://localhost:8080/?{params}')
@@ -116,7 +123,10 @@ def receive_params():
     threading.Timer(1.0, open_browser, args=(data,)).start()
     
     # Wait for the chat to complete
-    while not session.get('chat_completed', False):
+    while True:
+        with chat_completed_lock:
+            if chat_completed:
+                break
         time.sleep(1)
     print("Chat completed")
     
