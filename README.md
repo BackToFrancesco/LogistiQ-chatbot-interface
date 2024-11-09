@@ -2,7 +2,9 @@
 
 ## Project Overview
 
-LogistiQ is an AI-powered negotiation assistant designed for Gruber Logistics. This innovative system automates and streamlines the process of negotiating transportation services with suppliers, leveraging advanced language models and a sophisticated chat interface.
+LogistiQ is an AI-powered negotiation assistant designed for Gruber Logistics, developed for the Bolzano Hackathon 2024. This innovative system automates and streamlines the process of negotiating transportation services with suppliers, leveraging advanced language models and a sophisticated chat interface.
+
+For more information about the Bolzano Hackathon 2024, visit: https://hackathon.bz.it/
 
 ## Key Features
 
@@ -16,6 +18,7 @@ LogistiQ is an AI-powered negotiation assistant designed for Gruber Logistics. T
 
 - **Backend**: Python with Flask web framework
 - **AI Model**: Anthropic's Claude 3 Sonnet (via Amazon Bedrock)
+- **LLM Framework**: LangChain for advanced language model interactions
 - **Frontend**: HTML, JavaScript, and jQuery
 - **API**: RESTful endpoints for starting chats and processing messages
 
