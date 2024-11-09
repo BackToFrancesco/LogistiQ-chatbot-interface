@@ -85,7 +85,7 @@ Always include your current offer in your response.
         input_variables=["initial_message", "history_str", "language", "origin", "destination", "transport_cost", "starting_price", "max_price", "input"],
         partial_variables={"format_instructions": parser.get_format_instructions()}
     )
-    return prompt.format(**input_dict, initial_message=initial_message, history_str=history_str)
+    return prompt
 
 def chat(input_text, language, transport_cost, origin, destination, starting_price, max_price):
     conversation_history.append(HumanMessage(content=input_text))
@@ -100,8 +100,19 @@ def chat(input_text, language, transport_cost, origin, destination, starting_pri
         "max_price": max_price
     }, initial_message)
     
+    history_str = "\n".join([f"{'Chatbot' if isinstance(msg, AIMessage) else 'Supplier'}: {msg.content}" for msg in conversation_history])
     chain = prompt | llm | parser
-    response = chain.invoke({"input": input_text})
+    response = chain.invoke({
+        "input": input_text,
+        "initial_message": initial_message,
+        "history_str": history_str,
+        "language": language,
+        "origin": origin,
+        "destination": destination,
+        "transport_cost": transport_cost,
+        "starting_price": starting_price,
+        "max_price": max_price
+    })
     
     conversation_history.append(AIMessage(content=response.message))
     return response
