@@ -20,14 +20,7 @@ For more information about the Bolzano Hackathon 2024, visit: https://hackathon.
 - **AI Model**: Anthropic's Claude 3 Sonnet (via Amazon Bedrock)
 - **LLM Framework**: LangChain for advanced language model interactions
 - **Frontend**: HTML, JavaScript, and jQuery
-- **API**: RESTful endpoints for starting chats and processing messages
-
-## Setup and Installation
-
-1. Clone the repository
-2. Install required Python packages: `pip install -r requirements.txt`
-3. Set up your AWS credentials for Bedrock access
-4. Run the Flask application: `python app.py`
+- **API**: RESTful endpoints for starting chats and processing message
 
 ## Usage
 
@@ -43,17 +36,3 @@ Key parameters that can be configured include:
 - Maximum acceptable price
 - Origin and destination cities
 - Negotiation language
-
-## Future Enhancements
-
-- Integration with more language models and AI providers
-- Enhanced analytics and reporting features
-- Mobile app for on-the-go negotiation monitoring
-
-## Contributing
-
-We welcome contributions to improve LogistiQ. Please see our contributing guidelines for more information.
-
-## License
-
-This project is proprietary software owned by Gruber Logistics. All rights reserved.
