@@ -94,6 +94,8 @@ def receive_params():
     session['chat_initiated'] = True
     session['chat_completed'] = False
     session['requester_id'] = data.get('requester_id')
+
+    # should start a web window locally to chat the bot
     
     return jsonify({"message": "Parameters received. Chat ready to be initiated."})
 
