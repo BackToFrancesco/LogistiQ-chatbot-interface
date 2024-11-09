@@ -28,8 +28,8 @@ llm = ChatBedrock(
 conversation_history = []
 
 class ChatbotResponse(BaseModel):
-    message: str = Field(description="The chatbot's response message")
-    price_offered: float | None = Field(default=None, description="Price offered as a float")
+    message: str = Field(description="The chatbot's response message", examples=["Mi dispiace, 100000 è davvero un prezzo troppo alto per noi. Il nostro budget massimo per questa tratta è di 1500. Posso offrirvi 1200 per il trasporto da Bolzano a Monaco. Fatemi sapere se questa cifra è più accettabile."])
+    price_offered: float | None = Field(default=None, description="Price offered as a float", examples=[1150.0, 2000.0])
 
 # Create a parser for the ChatbotResponse
 parser = PydanticOutputParser(pydantic_object=ChatbotResponse)
@@ -77,8 +77,11 @@ Negotiation Strategy:
 Respond professionally as the AI assistant, addressing the supplier's input and continuing the negotiation.
 Make counter-offers when appropriate, and be prepared to end the negotiation if the maximum price is exceeded.
 Always include your current offer in your response.
-
-{format_instructions}
+Always respond using the following format:
+{{
+message: str,
+price_offered: float | None = None
+}}
 """
     prompt = PromptTemplate(
         template=template,
