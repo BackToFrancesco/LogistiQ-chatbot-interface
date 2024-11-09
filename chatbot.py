@@ -77,10 +77,24 @@ Negotiation Strategy:
 Respond professionally as the AI assistant, addressing the supplier's input and continuing the negotiation.
 Make counter-offers when appropriate, and be prepared to end the negotiation if the maximum price is exceeded.
 Always include your current offer in your response.
-Always respond using the following format:
+
+IMPORTANT: Your response MUST be a valid JSON object with the following structure:
 {{
-message: str,
-price_offered: float | None = None
+    "message": "Your response message here",
+    "price_offered": 1234.56
+}}
+
+Ensure that:
+1. The entire response is wrapped in curly braces {{}}.
+2. Both keys ("message" and "price_offered") are in double quotes.
+3. The message value is a string in double quotes.
+4. The price_offered value is a number without quotes.
+5. There is a comma between the two key-value pairs.
+
+If you're not making a price offer, use null for the price_offered value:
+{{
+    "message": "Your response message here",
+    "price_offered": null
 }}
 """
     prompt = PromptTemplate(
