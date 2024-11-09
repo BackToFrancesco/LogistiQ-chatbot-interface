@@ -14,8 +14,9 @@ def index():
 
 @app.route('/start_chat', methods=['POST'])
 def start_chat():
-    global starting_price, max_price, current_offer, conversation_history
+    global starting_price, max_price, current_offer, conversation_history, final_price
     starting_price = float(request.json['starting_price'])
+    final_price = starting_price
     max_price = float(request.json['max_price'])
     current_offer = starting_price
     conversation_history = []
@@ -34,13 +35,9 @@ def chat_endpoint():
         final_message = translate_message("Great! The negotiation has concluded successfully. We are now waiting for approval from the company to proceed with the payment. Thank you for your cooperation.", LANGUAGE)
         conversation_history.append({"role": "human", "content": user_input})
         conversation_history.append({"role": "assistant", "content": final_message})
-        
-        # Analyze the conversation to get the final agreed price
-        conversation_history_final_price = conversation_history[:-2]
-        final_price = analyze_conversation_for_final_price(conversation_history_final_price)
+        print(f"final message: {final_message}")
         
         return_value = jsonify({
-            "message": final_message,
             "end_chat": True,
             "agreement_reached": True,
             "final_deal": {
@@ -58,12 +55,10 @@ def chat_endpoint():
     response: ChatbotResponse = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
     conversation_history.append({"role": "human", "content": user_input})
     conversation_history.append({"role": "assistant", "content": response.message})
+    print(f"response: {response}")
 
-    if response.price_offered is not None:
-        current_offer = response.price_offered
-
-    if current_offer > max_price:
-        return jsonify({"message": response.message, "end_chat": True})
+    if response and response.price_offered:
+        final_price = response.price_offered
 
     return jsonify({"message": response.message})
 
@@ -75,7 +70,7 @@ def analyze_conversation_for_final_price(conversation_history):
     
     if not latest_ai_message:
         return None
-    
+    print(latest_ai_message)
     # The content should already be a ChatbotResponse object
     return latest_ai_message['content'].price_offered
 
