@@ -64,20 +64,30 @@
 
     <script>
         $(document).ready(function() {
-            const startingPrice = {{ starting_price|default('null') }};
-            const maxPrice = {{ max_price|default('null') }};
-            const origin = "{{ origin|default('') }}";
-            const destination = "{{ destination|default('') }}";
-            const chatInitiated = {{ 'true' if session.get('chat_initiated') else 'false' }};
+            // Function to get URL parameters
+            function getUrlParameter(name) {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                var results = regex.exec(location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            }
+
+            // Get parameters from URL
+            const startingPrice = getUrlParameter('starting_price');
+            const maxPrice = getUrlParameter('max_price');
+            const origin = getUrlParameter('origin');
+            const destination = getUrlParameter('destination');
+            const chatInitiated = getUrlParameter('chat_initiated') === 'true';
+
+            // Populate form fields
+            if (startingPrice) $('#starting-price').val(startingPrice);
+            if (maxPrice) $('#max-price').val(maxPrice);
+            if (origin) $('#origin').val(origin);
+            if (destination) $('#destination').val(destination);
 
             if (chatInitiated) {
                 $('#setup-form').hide();
                 $('#received-params').show();
-            } else if (startingPrice && maxPrice && origin && destination) {
-                $('#starting-price').val(startingPrice);
-                $('#max-price').val(maxPrice);
-                $('#origin').val(origin);
-                $('#destination').val(destination);
             }
         });
 
