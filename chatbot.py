@@ -41,10 +41,10 @@ parser = PydanticOutputParser(pydantic_object=ChatbotResponse)
 
 # Function to generate the initial message in English
 def get_initial_message_english(initial_price, origin, destination):
-    return (f"Greetings! I'm ChatBot, the AI assistant for LogisticsPro Inc. I'm reaching out to discuss "
+    return (f"Greetings! I'm LogistiQ, the AI assistant for Gruber Logistics. I'm reaching out to discuss "
             f"contracting transportation services for our upcoming needs. Specifically, we're looking to "
             f"arrange a truck for a shipment from {origin} to {destination}. Our initial budget estimate "
-            f"for this route is ${initial_price}, but we're open to negotiation based on the services you can offer.")
+            f"for this route is ${initial_price}.")
 
 def translate_message(message, target_language):
     """
@@ -74,6 +74,7 @@ Maximum Price: {max_price}
 Supplier's response: {input}
 
 IMPORTANT: The conversation should be in {language}.
+IMPORTANT: You should NEVER mention that the maximum price that you can offer is {max_price}.
 
 Negotiation Strategy:
 1. Start with the initial price of {starting_price}.

@@ -50,7 +50,7 @@ def chat_endpoint():
     global current_offer, conversation_history, final_price, chat_completed, final_status, origin, destination
     user_input = request.json['message']
     
-    if "deal" in user_input.lower():
+    if "deal" in user_input.lower() or "accetto" in user_input.lower():
         final_message = "Great! The negotiation has concluded successfully. We are now waiting for approval from the company to proceed with the payment. Thank you for your cooperation."
         if LANGUAGE != "en":
             final_message = translate_message(final_message, LANGUAGE)
@@ -72,7 +72,7 @@ def chat_endpoint():
         
         return return_value
     
-    if "refuse" in user_input.lower():
+    if "refuse" in user_input.lower() or "rifiuto" in user_input.lower():
         final_message = "The negotiation has concluded unsuccessfully since we couldn't reach a deal. Thank you for your time."
         if LANGUAGE != "en":
             final_message = translate_message(final_message, LANGUAGE)
@@ -165,7 +165,8 @@ def receive_params():
     return jsonify({
         "final_price": final_price,
         "final_status": final_status,
-        "conversation_history": conversation_history
+        "conversation_history": conversation_history,
+        "name": data['rank'][0]['name'],
     })
 
 @app.route('/get_chat_result', methods=['GET'])
