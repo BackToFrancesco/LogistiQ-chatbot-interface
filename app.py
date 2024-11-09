@@ -81,6 +81,9 @@ def analyze_conversation_for_final_price(conversation_history):
     # The content should already be a ChatbotResponse object
     return latest_ai_message['content'].price_offered
 
+import webbrowser
+import threading
+
 @app.route('/receive_params', methods=['POST'])
 def receive_params():
     data = request.json
@@ -95,9 +98,13 @@ def receive_params():
     session['chat_completed'] = False
     session['requester_id'] = data.get('requester_id')
 
-    # should start a web window locally to chat the bot
+    # Start a web window locally to chat with the bot
+    def open_browser():
+        webbrowser.open_new('http://localhost:8080')
+
+    threading.Timer(1.0, open_browser).start()
     
-    return jsonify({"message": "Parameters received. Chat ready to be initiated."})
+    return jsonify({"message": "Parameters received. Chat window opening..."})
 
 @app.route('/get_chat_result', methods=['GET'])
 def get_chat_result():
