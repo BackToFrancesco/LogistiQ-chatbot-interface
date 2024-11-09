@@ -92,5 +92,3 @@ def extract_offer_from_response(response):
     if match:
         return float(match.group(1))
     return None
-
-# The main loop and related code has been removed as it's now handled by the Flask app
