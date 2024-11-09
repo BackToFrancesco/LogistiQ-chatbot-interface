@@ -2,7 +2,7 @@ import boto3
 from langchain_aws import ChatBedrock
 from langchain.schema import HumanMessage, AIMessage
 from langchain_core.runnables import RunnablePassthrough
-from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 
