@@ -100,10 +100,12 @@ def receive_params():
 
     # Start a web window locally to chat with the bot
     def open_browser():
+        # the chat that I start should have the above parameters passed in input
         webbrowser.open_new('http://localhost:8080')
 
     threading.Timer(1.0, open_browser).start()
     
+    # This should return only when conversation end e.g. user accepts or declines
     return jsonify({"message": "Parameters received. Chat window opening..."})
 
 @app.route('/get_chat_result', methods=['GET'])
