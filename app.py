@@ -51,6 +51,9 @@ def chat_endpoint():
         conversation_history.append({"role": "assistant", "content": final_message})
         print(f"final message: {final_message}")
         
+        # Set the final_price to the current_offer
+        final_price = current_offer
+        
         return_value = jsonify({
             "message": final_message,
             "end_chat": True,
@@ -62,10 +65,6 @@ def chat_endpoint():
         print(return_value.get_data(as_text=True))
         with chat_completed_lock:
             chat_completed = True
-        
-        # Set the final_price in the global scope
-        global final_price
-        final_price = current_offer
         
         return return_value
     
