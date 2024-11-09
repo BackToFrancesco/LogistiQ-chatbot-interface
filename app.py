@@ -12,6 +12,7 @@ current_offer = 0
 starting_price = 0
 max_price = 0
 final_price = 0  # Initialize final_price
+final_status = "failed"
 origin = ORIGIN
 destination = DESTINATION
 chat_completed = False
@@ -35,25 +36,29 @@ def start_chat():
     origin = request.json.get('origin', ORIGIN)
     destination = request.json.get('destination', DESTINATION)
     LANGUAGE = request.json.get('language', LANGUAGE)
+    print("LANGUAGE is", LANGUAGE)
     current_offer = starting_price
     conversation_history = []
 
-    initial_message = translate_message(get_initial_message_english(starting_price, origin, destination), target_language=LANGUAGE)
+    initial_message = translate_message(get_initial_message_english(starting_price, origin, destination), target_language=LANGUAGE) if LANGUAGE != "en" else get_initial_message_english(starting_price, origin, destination)
     conversation_history.append({"role": "assistant", "content": initial_message})
 
     return jsonify({"message": initial_message})
 
 @app.route('/chat', methods=['POST'])
 def chat_endpoint():
-    global current_offer, conversation_history, final_price, chat_completed
+    global current_offer, conversation_history, final_price, chat_completed, final_status
     user_input = request.json['message']
     
     if "deal" in user_input.lower():
-        final_message = translate_message("Great! The negotiation has concluded successfully. We are now waiting for approval from the company to proceed with the payment. Thank you for your cooperation.", LANGUAGE)
+        final_message = "Great! The negotiation has concluded successfully. We are now waiting for approval from the company to proceed with the payment. Thank you for your cooperation."
+        if LANGUAGE != "en":
+            final_message = translate_message(final_message, LANGUAGE)
         conversation_history.append({"role": "human", "content": user_input})
         conversation_history.append({"role": "assistant", "content": final_message})
-        final_price = current_offer
-        
+        #final_price = current_offer
+        final_status = "success"
+
         return_value = jsonify({
             "message": final_message,
             "end_chat": True,
@@ -68,9 +73,13 @@ def chat_endpoint():
         return return_value
     
     if "refuse" in user_input.lower():
-        final_message = translate_message("The negotiation has concluded unsuccessfully since we couldn't reach a deal. Thank you for your time.", LANGUAGE)
+        final_message = "The negotiation has concluded unsuccessfully since we couldn't reach a deal. Thank you for your time."
+        if LANGUAGE != "en":
+            final_message = translate_message(final_message, LANGUAGE)
         conversation_history.append({"role": "human", "content": user_input})
         conversation_history.append({"role": "assistant", "content": final_message})
+        final_status = "failed"
+        final_price = None
         
         return_value = jsonify({
             "message": final_message,
@@ -155,6 +164,7 @@ def receive_params():
     # Return the final result
     return jsonify({
         "final_price": final_price,
+        "final_status": final_status,
         "conversation_history": conversation_history
     })
 
