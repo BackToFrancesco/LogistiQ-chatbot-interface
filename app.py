@@ -41,11 +41,7 @@ def chat_endpoint():
         return_value = jsonify({
             "end_chat": True,
             "agreement_reached": True,
-            "final_deal": {
-                "price": final_price,
-                "origin": ORIGIN,
-                "destination": DESTINATION
-            }
+            "price": final_price,
         })
         
         print("Return value when user accepts:")
