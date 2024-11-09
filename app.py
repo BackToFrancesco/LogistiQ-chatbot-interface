@@ -63,6 +63,10 @@ def chat_endpoint():
         with chat_completed_lock:
             chat_completed = True
         
+        # Set the final_price in the global scope
+        global final_price
+        final_price = current_offer
+        
         return return_value
     
     response: ChatbotResponse = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
@@ -93,7 +97,7 @@ import threading
 
 @app.route('/receive_params', methods=['POST'])
 def receive_params():
-    global chat_completed
+    global chat_completed, final_price
     data = request.json
     print("Received params:", data)
     
@@ -104,9 +108,10 @@ def receive_params():
     origin = data.get('load_city', ORIGIN)
     destination = data.get('unload_city', DESTINATION)
     
-    # Reset chat_completed flag
+    # Reset chat_completed flag and final_price
     with chat_completed_lock:
         chat_completed = False
+    final_price = 0
 
     # Start a web window locally to chat with the bot
     def open_browser(data):
@@ -131,7 +136,6 @@ def receive_params():
     print("Chat completed")
     
     # Return the final result
-    final_price = analyze_conversation_for_final_price(conversation_history)
     return jsonify({
         "final_price": final_price,
         "conversation_history": conversation_history
