@@ -47,7 +47,7 @@ def start_chat():
 
 @app.route('/chat', methods=['POST'])
 def chat_endpoint():
-    global current_offer, conversation_history, final_price, chat_completed, final_status
+    global current_offer, conversation_history, final_price, chat_completed, final_status, origin, destination
     user_input = request.json['message']
     
     if "deal" in user_input.lower():
@@ -93,7 +93,7 @@ def chat_endpoint():
         
         return return_value
     
-    response: ChatbotResponse = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
+    response: ChatbotResponse = chat(user_input, LANGUAGE, current_offer, origin, destination, starting_price, max_price)
     conversation_history.append({"role": "human", "content": user_input})
     conversation_history.append({"role": "assistant", "content": response.message})
     print(f"response: {response}")
