@@ -106,6 +106,7 @@ def receive_params():
     max_price = float(data.get('maximum_price', 0))
     origin = data.get('load_city', ORIGIN)
     destination = data.get('unload_city', DESTINATION)
+    print(f"Starting price: {starting_price}, max price: {max_price}, origin: {origin}, destination: {destination}")
     
     # Reset chat_completed flag and final_price
     with chat_completed_lock:
