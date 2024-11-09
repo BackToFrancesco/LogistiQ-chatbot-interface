@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from chatbot import chat, get_initial_message_english, LANGUAGE, ORIGIN, DESTINATION, translate_message, ChatbotResponse
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key_here'  # Add this line for session management
 
 conversation_history = []
 current_offer = 0
@@ -13,7 +14,12 @@ destination = DESTINATION
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Pass any existing chat parameters to the template
+    return render_template('index.html', 
+                           starting_price=session.get('starting_price'),
+                           max_price=session.get('max_price'),
+                           origin=session.get('origin'),
+                           destination=session.get('destination'))
 
 @app.route('/start_chat', methods=['POST'])
 def start_chat():
@@ -77,34 +83,17 @@ def analyze_conversation_for_final_price(conversation_history):
 
 @app.route('/receive_params', methods=['POST'])
 def receive_params():
-    global starting_price, max_price, current_offer, conversation_history, final_price, origin, destination
-    
     data = request.json
     print("Received params:", data)
     
-    # Extract necessary parameters from the received JSON
-    starting_price = float(data.get('starting_price', 0))
-    max_price = float(data.get('max_price', 0))
-    origin = data.get('origin', ORIGIN)
-    destination = data.get('destination', DESTINATION)
+    # Store parameters in session
+    session['starting_price'] = float(data.get('starting_price', 0))
+    session['max_price'] = float(data.get('max_price', 0))
+    session['origin'] = data.get('origin', ORIGIN)
+    session['destination'] = data.get('destination', DESTINATION)
     
-    # Initialize chat parameters
-    current_offer = starting_price
-    final_price = starting_price
-    conversation_history = []
-
-    # Generate initial message
-    initial_message = translate_message(get_initial_message_english(starting_price, origin, destination), target_language=LANGUAGE)
-    conversation_history.append({"role": "assistant", "content": initial_message})
-
-    # Start the chat with the model
-    response = chat("", LANGUAGE, current_offer, origin, destination, starting_price, max_price)
-    
-    return jsonify({
-        "status": "Chat initiated",
-        "initial_message": initial_message,
-        "model_response": response.message
-    })
+    # Redirect to the main page
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8080)

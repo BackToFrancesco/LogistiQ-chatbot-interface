@@ -46,6 +46,10 @@
         <input type="number" id="starting-price" required>
         <label for="max-price">Maximum Price:</label>
         <input type="number" id="max-price" required>
+        <label for="origin">Origin:</label>
+        <input type="text" id="origin" required>
+        <label for="destination">Destination:</label>
+        <input type="text" id="destination" required>
         <button onclick="startChat()">Start Chat</button>
     </div>
     <div id="chat-interface" style="display: none;">
@@ -55,15 +59,38 @@
     </div>
 
     <script>
+        // Check for existing chat parameters when the page loads
+        $(document).ready(function() {
+            const startingPrice = {{ starting_price|default('null') }};
+            const maxPrice = {{ max_price|default('null') }};
+            const origin = "{{ origin|default('') }}";
+            const destination = "{{ destination|default('') }}";
+
+            if (startingPrice && maxPrice && origin && destination) {
+                $('#starting-price').val(startingPrice);
+                $('#max-price').val(maxPrice);
+                $('#origin').val(origin);
+                $('#destination').val(destination);
+                startChat();
+            }
+        });
+
         function startChat() {
             const startingPrice = $('#starting-price').val();
             const maxPrice = $('#max-price').val();
+            const origin = $('#origin').val();
+            const destination = $('#destination').val();
             
             $.ajax({
                 url: '/start_chat',
                 method: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ starting_price: startingPrice, max_price: maxPrice }),
+                data: JSON.stringify({ 
+                    starting_price: startingPrice, 
+                    max_price: maxPrice,
+                    origin: origin,
+                    destination: destination
+                }),
                 success: function(response) {
                     $('#setup-form').hide();
                     $('#chat-interface').show();
