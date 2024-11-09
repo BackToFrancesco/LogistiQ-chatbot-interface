@@ -7,6 +7,7 @@ conversation_history = []
 current_offer = 0
 starting_price = 0
 max_price = 0
+final_price = 0  # Initialize final_price
 
 @app.route('/')
 def index():
@@ -16,7 +17,7 @@ def index():
 def start_chat():
     global starting_price, max_price, current_offer, conversation_history, final_price
     starting_price = float(request.json['starting_price'])
-    final_price = starting_price
+    final_price = starting_price  # Set initial final_price
     max_price = float(request.json['max_price'])
     current_offer = starting_price
     conversation_history = []
@@ -28,7 +29,7 @@ def start_chat():
 
 @app.route('/chat', methods=['POST'])
 def chat_endpoint():
-    global current_offer, conversation_history
+    global current_offer, conversation_history, final_price
     user_input = request.json['message']
     
     if user_input.lower().strip() == "accept":
@@ -57,8 +58,9 @@ def chat_endpoint():
     conversation_history.append({"role": "assistant", "content": response.message})
     print(f"response: {response}")
 
-    if response and response.price_offered:
+    if response and response.price_offered is not None:
         final_price = response.price_offered
+        current_offer = final_price
 
     return jsonify({"message": response.message})
 
