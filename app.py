@@ -57,6 +57,7 @@ def chat_endpoint():
         
         print("Return value when user accepts:")
         print(return_value.get_data(as_text=True))
+        session['chat_completed'] = True
         
         return return_value
     
@@ -117,6 +118,7 @@ def receive_params():
     # Wait for the chat to complete
     while not session.get('chat_completed', False):
         time.sleep(1)
+    print("Chat completed")
     
     # Return the final result
     final_price = analyze_conversation_for_final_price(conversation_history)
