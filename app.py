@@ -71,8 +71,7 @@ def chat_endpoint():
         
         return return_value
     
-    additional_data = session.get('additional_data', {})
-    response: ChatbotResponse = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price, additional_data)
+    response: ChatbotResponse = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
     conversation_history.append({"role": "human", "content": user_input})
     conversation_history.append({"role": "assistant", "content": response.message})
     print(f"response: {response}")
@@ -111,13 +110,6 @@ def receive_params():
     destination = data.get('unload_city', DESTINATION)
     LANGUAGE = data['rank'][0]['language'] if data.get('rank') and data['rank'] else LANGUAGE  # Update the global LANGUAGE
     print(f"Starting price: {starting_price}, max price: {max_price}, origin: {origin}, destination: {destination}, language: {LANGUAGE}")
-    
-    # Store additional data in session
-    session['additional_data'] = {
-        "date": data.get("date"),
-        "rank": data.get("rank"),
-        "status": data.get("status")
-    }
     
     # Reset chat_completed flag and final_price
     with chat_completed_lock:
