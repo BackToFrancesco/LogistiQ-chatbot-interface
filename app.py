@@ -101,18 +101,18 @@ def receive_params():
     session['requester_id'] = data.get('requester_id')
 
     # Start a web window locally to chat with the bot
-    def open_browser():
+    def open_browser(data):
         # Pass the parameters to the chat interface
         params = urllib.parse.urlencode({
-            'starting_price': session['starting_price'],
-            'max_price': session['max_price'],
-            'origin': session['origin'],
-            'destination': session['destination'],
+            'starting_price': float(data.get('minimum_price', 0)),
+            'max_price': float(data.get('maximum_price', 0)),
+            'origin': data.get('load_city', ORIGIN),
+            'destination': data.get('unload_city', DESTINATION),
             'chat_initiated': 'true'
         })
         webbrowser.open_new(f'http://localhost:8080/?{params}')
 
-    threading.Timer(1.0, open_browser).start()
+    threading.Timer(1.0, open_browser, args=(data,)).start()
     
     # Wait for the chat to complete
     while not session.get('chat_completed', False):
