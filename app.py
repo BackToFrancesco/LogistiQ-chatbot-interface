@@ -91,9 +91,22 @@ def receive_params():
     session['max_price'] = float(data.get('maximum_price', 0))
     session['origin'] = data.get('load_city', ORIGIN)
     session['destination'] = data.get('unload_city', DESTINATION)
+    session['chat_initiated'] = True
+    session['chat_completed'] = False
+    session['requester_id'] = data.get('requester_id')
     
-    # Redirect to the main page
-    return redirect(url_for('index'))
+    return jsonify({"message": "Parameters received. Chat ready to be initiated."})
+
+@app.route('/get_chat_result', methods=['GET'])
+def get_chat_result():
+    if session.get('chat_completed'):
+        final_price = analyze_conversation_for_final_price(conversation_history)
+        return jsonify({
+            "final_price": final_price,
+            "conversation_history": conversation_history
+        })
+    else:
+        return jsonify({"message": "Chat not completed yet."}), 202
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8080)

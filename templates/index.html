@@ -52,6 +52,10 @@
         <input type="text" id="destination" required>
         <button onclick="startChat()">Start Chat</button>
     </div>
+    <div id="received-params" style="display: none;">
+        <p>Parameters received. Ready to start chat.</p>
+        <button onclick="startReceivedChat()">Start Received Chat</button>
+    </div>
     <div id="chat-interface" style="display: none;">
         <div id="chat-container"></div>
         <input type="text" id="user-input" placeholder="Type your message here...">
@@ -64,15 +68,23 @@
             const maxPrice = {{ max_price|default('null') }};
             const origin = "{{ origin|default('') }}";
             const destination = "{{ destination|default('') }}";
+            const chatInitiated = {{ 'true' if session.get('chat_initiated') else 'false' }};
 
-            if (startingPrice && maxPrice && origin && destination) {
+            if (chatInitiated) {
+                $('#setup-form').hide();
+                $('#received-params').show();
+            } else if (startingPrice && maxPrice && origin && destination) {
                 $('#starting-price').val(startingPrice);
                 $('#max-price').val(maxPrice);
                 $('#origin').val(origin);
                 $('#destination').val(destination);
-                startChat();
             }
         });
+
+        function startReceivedChat() {
+            startChat();
+            $('#received-params').hide();
+        }
 
         function startChat() {
             const startingPrice = $('#starting-price').val();
