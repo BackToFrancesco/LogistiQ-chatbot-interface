@@ -36,7 +36,8 @@ def chat_endpoint():
         conversation_history.append({"role": "assistant", "content": final_message})
         
         # Analyze the conversation to get the final agreed price
-        final_price = analyze_conversation_for_final_price(conversation_history)
+        conversation_history_final_price = conversation_history[:-2]
+        final_price = analyze_conversation_for_final_price(conversation_history_final_price)
         
         return_value = jsonify({
             "message": final_message,
@@ -77,13 +78,14 @@ def extract_offer_from_response(response):
 def analyze_conversation_for_final_price(conversation_history):
     # Get the latest AI assistant message
     latest_ai_message = next((msg['content'] for msg in reversed(conversation_history) if msg['role'] == 'assistant'), None)
+    print(latest_ai_message)
     
     if not latest_ai_message:
         return None
     
     prompt = f"""
     Analyze the following message and extract the final agreed price for the transportation service.
-    Only return the numeric value of the final price, without any currency symbols or additional text.
+    ONLY return the numeric value of the final price, without any currency symbols or additional text.
 
     Message:
     {latest_ai_message}
@@ -101,5 +103,11 @@ def analyze_conversation_for_final_price(conversation_history):
     else:
         return None
 
+@app.route('/receive_params', methods=['POST'])
+def receive_params():
+    print("Received params:")
+    print(request.json)
+    return jsonify({"message": "Received params"})
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=8080)
