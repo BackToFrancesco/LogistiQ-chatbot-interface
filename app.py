@@ -77,7 +77,7 @@ def analyze_conversation_for_final_price(conversation_history):
 def receive_params():
     print("Received params:")
     print(request.json)
-    return jsonify({"message": "Received params"})
+    return jsonify({"status": "Accepted"})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8080)

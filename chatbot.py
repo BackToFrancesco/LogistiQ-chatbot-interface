@@ -80,7 +80,7 @@ Always include your current offer in your response.
 
 IMPORTANT: Your response MUST be a valid JSON object with the following structure:
 {{
-    "message": "Your response message here",
+    "message": "The chatbot's response message including the price offered",
     "price_offered": 1234.56
 }}
 
@@ -93,7 +93,7 @@ Ensure that:
 
 If you're not making a price offer, use null for the price_offered value:
 {{
-    "message": "Your response message here",
+    "message": "The chatbot's response message",
     "price_offered": null
 }}
 """
