@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from chatbot import chat, get_initial_message_english, LANGUAGE, ORIGIN, DESTINATION, translate_message, llm
+from chatbot import chat, get_initial_message_english, LANGUAGE, ORIGIN, DESTINATION, translate_message, ChatbotResponse
 
 app = Flask(__name__)
 
@@ -55,53 +55,29 @@ def chat_endpoint():
         
         return return_value
     
-    response = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
+    response: ChatbotResponse = chat(user_input, LANGUAGE, current_offer, ORIGIN, DESTINATION, starting_price, max_price)
     conversation_history.append({"role": "human", "content": user_input})
-    conversation_history.append({"role": "assistant", "content": response})
+    conversation_history.append({"role": "assistant", "content": response.message})
 
-    new_offer = extract_offer_from_response(response)
-    if new_offer is not None:
-        current_offer = new_offer
+    if response.price_offered is not None:
+        current_offer = response.price_offered
 
     if current_offer > max_price:
-        return jsonify({"message": response, "end_chat": True})
+        return jsonify({"message": response.message, "end_chat": True})
 
-    return jsonify({"message": response})
+    return jsonify({"message": response.message})
 
-def extract_offer_from_response(response):
-    import re
-    match = re.search(r"Current offer: \$(\d+(?:\.\d{2})?)", response)
-    if match:
-        return float(match.group(1))
-    return None
+# The extract_offer_from_response function has been removed as it's no longer needed
 
 def analyze_conversation_for_final_price(conversation_history):
     # Get the latest AI assistant message
-    latest_ai_message = next((msg['content'] for msg in reversed(conversation_history) if msg['role'] == 'assistant'), None)
-    print(latest_ai_message)
+    latest_ai_message = next((msg for msg in reversed(conversation_history) if msg['role'] == 'assistant'), None)
     
     if not latest_ai_message:
         return None
     
-    prompt = f"""
-    Analyze the following message and extract the final agreed price for the transportation service.
-    ONLY return the numeric value of the final price, without any currency symbols or additional text.
-
-    Message:
-    {latest_ai_message}
-
-    Final agreed price:
-    """
-
-    response = llm.invoke(prompt)
-    
-    # Extract the numeric value from the response
-    import re
-    price_match = re.search(r'\d+(\.\d{2})?', response.content)
-    if price_match:
-        return float(price_match.group())
-    else:
-        return None
+    # The content should already be a ChatbotResponse object
+    return latest_ai_message['content'].price_offered
 
 @app.route('/receive_params', methods=['POST'])
 def receive_params():

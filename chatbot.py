@@ -2,6 +2,9 @@ import boto3
 from langchain_aws import ChatBedrock
 from langchain.schema import HumanMessage, AIMessage
 from langchain_core.runnables import RunnablePassthrough
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain.output_parsers import PydanticOutputParser
+from langchain.prompts import PromptTemplate
 
 # Constants
 LANGUAGE = "Italian"
@@ -24,6 +27,13 @@ llm = ChatBedrock(
 # Initialize conversation history
 conversation_history = []
 
+class ChatbotResponse(BaseModel):
+    message: str = Field(description="The chatbot's response message")
+    price_offered: float | None = Field(default=None, description="Price offered as a float")
+
+# Create a parser for the ChatbotResponse
+parser = PydanticOutputParser(pydantic_object=ChatbotResponse)
+
 # Function to generate the initial message in English
 def get_initial_message_english(initial_price, origin, destination):
     return (f"Greetings! I'm ChatBot, the AI assistant for LogisticsPro Inc. I'm reaching out to discuss "
@@ -41,7 +51,7 @@ def translate_message(message, target_language):
 
 def create_prompt(input_dict, initial_message):
     history_str = "\n".join([f"{'Chatbot' if isinstance(msg, AIMessage) else 'Supplier'}: {msg.content}" for msg in conversation_history])
-    return f"""
+    template = """
 You are an AI assistant for LogisticsPro Inc., negotiating transportation services.
 Context: You initiated the conversation with the following message:
 {initial_message}
@@ -50,24 +60,32 @@ Conversation history:
 {history_str}
 
 Continue the conversation based on this context.
-Language: {input_dict['language']}
-Origin: {input_dict['origin']}
-Destination: {input_dict['destination']}
-Current Offer: {input_dict['transport_cost']}
-Starting Price: {input_dict['starting_price']}
-Maximum Price: {input_dict['max_price']}
-Supplier's response: {input_dict['input']}
+Language: {language}
+Origin: {origin}
+Destination: {destination}
+Current Offer: {transport_cost}
+Starting Price: {starting_price}
+Maximum Price: {max_price}
+Supplier's response: {input}
 
 Negotiation Strategy:
-1. Start with the initial price of {input_dict['starting_price']}.
+1. Start with the initial price of {starting_price}.
 2. Make counter-offers based on the supplier's responses.
-3. Gradually increase your offer if necessary, but do not exceed {input_dict['max_price']}.
-4. If the supplier doesn't accept a price at or below {input_dict['max_price']}, end the negotiation.
+3. Gradually increase your offer if necessary, but do not exceed {max_price}.
+4. If the supplier doesn't accept a price at or below {max_price}, end the negotiation.
 
 Respond professionally as the AI assistant, addressing the supplier's input and continuing the negotiation.
 Make counter-offers when appropriate, and be prepared to end the negotiation if the maximum price is exceeded.
-Always include your current offer in your response".
+Always include your current offer in your response.
+
+{format_instructions}
 """
+    prompt = PromptTemplate(
+        template=template,
+        input_variables=["initial_message", "history_str", "language", "origin", "destination", "transport_cost", "starting_price", "max_price", "input"],
+        partial_variables={"format_instructions": parser.get_format_instructions()}
+    )
+    return prompt.format(**input_dict, initial_message=initial_message, history_str=history_str)
 
 def chat(input_text, language, transport_cost, origin, destination, starting_price, max_price):
     conversation_history.append(HumanMessage(content=input_text))
@@ -81,14 +99,11 @@ def chat(input_text, language, transport_cost, origin, destination, starting_pri
         "starting_price": starting_price,
         "max_price": max_price
     }, initial_message)
-    response = llm.invoke(prompt)
-    content = response.content if isinstance(response, AIMessage) else str(response)
-    conversation_history.append(AIMessage(content=content))
-    return content
+    
+    chain = prompt | llm | parser
+    response = chain.invoke({"input": input_text})
+    
+    conversation_history.append(AIMessage(content=response.message))
+    return response
 
-def extract_offer_from_response(response):
-    import re
-    match = re.search(r"Current offer: \$(\d+(?:\.\d{2})?)", response)
-    if match:
-        return float(match.group(1))
-    return None
+# The extract_offer_from_response function is no longer needed and has been removed
