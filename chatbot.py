@@ -68,6 +68,12 @@ Starting Price: {starting_price}
 Maximum Price: {max_price}
 Supplier's response: {input}
 
+Additional Information:
+Date: {date}
+Supplier Name: {supplier_name}
+Supplier Language: {supplier_language}
+Status: {status}
+
 Negotiation Strategy:
 1. Start with the initial price of {starting_price}.
 2. Make counter-offers based on the supplier's responses.
@@ -104,7 +110,7 @@ If you're not making a price offer, use null for the price_offered value:
     )
     return prompt
 
-def chat(input_text, language, transport_cost, origin, destination, starting_price, max_price):
+def chat(input_text, language, transport_cost, origin, destination, starting_price, max_price, additional_data):
     global LANGUAGE, ORIGIN, DESTINATION  # Add this line to use global variables
     LANGUAGE = language  # Update the global LANGUAGE
     ORIGIN = origin  # Update the global ORIGIN
@@ -119,7 +125,11 @@ def chat(input_text, language, transport_cost, origin, destination, starting_pri
         "origin": origin,
         "destination": destination,
         "starting_price": starting_price,
-        "max_price": max_price
+        "max_price": max_price,
+        "date": additional_data["date"],
+        "supplier_name": additional_data["rank"][0]["name"],
+        "supplier_language": additional_data["rank"][0]["language"],
+        "status": additional_data["status"]
     }, initial_message)
     
     history_str = "\n".join([f"{'Chatbot' if isinstance(msg, AIMessage) else 'Supplier'}: {msg.content}" for msg in conversation_history])
@@ -133,7 +143,11 @@ def chat(input_text, language, transport_cost, origin, destination, starting_pri
         "destination": destination,
         "transport_cost": transport_cost,
         "starting_price": starting_price,
-        "max_price": max_price
+        "max_price": max_price,
+        "date": additional_data["date"],
+        "supplier_name": additional_data["rank"][0]["name"],
+        "supplier_language": additional_data["rank"][0]["language"],
+        "status": additional_data["status"]
     })
     
     conversation_history.append(AIMessage(content=response.message))
