@@ -48,13 +48,10 @@ def chat_endpoint():
     global current_offer, conversation_history, final_price, chat_completed
     user_input = request.json['message']
     
-    if user_input.lower().strip() == "accept":
+    if "deal" in user_input.lower():
         final_message = translate_message("Great! The negotiation has concluded successfully. We are now waiting for approval from the company to proceed with the payment. Thank you for your cooperation.", LANGUAGE)
         conversation_history.append({"role": "human", "content": user_input})
         conversation_history.append({"role": "assistant", "content": final_message})
-        print(f"final message: {final_message}")
-        
-        # Set the final_price to the current_offer
         final_price = current_offer
         
         return_value = jsonify({
@@ -62,10 +59,26 @@ def chat_endpoint():
             "end_chat": True,
             "agreement_reached": True,
             "price": final_price,
+            "final_status": "success"
         })
         
-        print("Return value when user accepts:")
-        print(return_value.get_data(as_text=True))
+        with chat_completed_lock:
+            chat_completed = True
+        
+        return return_value
+    
+    if "refuse" in user_input.lower():
+        final_message = translate_message("The negotiation has concluded unsuccessfully since we couldn't reach a deal. Thank you for your time.", LANGUAGE)
+        conversation_history.append({"role": "human", "content": user_input})
+        conversation_history.append({"role": "assistant", "content": final_message})
+        
+        return_value = jsonify({
+            "message": final_message,
+            "end_chat": True,
+            "agreement_reached": False,
+            "final_status": "failed"
+        })
+        
         with chat_completed_lock:
             chat_completed = True
         
