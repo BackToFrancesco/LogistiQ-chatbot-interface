@@ -8,6 +8,8 @@ current_offer = 0
 starting_price = 0
 max_price = 0
 final_price = 0  # Initialize final_price
+origin = ORIGIN
+destination = DESTINATION
 
 @app.route('/')
 def index():
@@ -75,9 +77,34 @@ def analyze_conversation_for_final_price(conversation_history):
 
 @app.route('/receive_params', methods=['POST'])
 def receive_params():
-    print("Received params:")
-    print(request.json)
-    return jsonify({"status": "Accepted"})
+    global starting_price, max_price, current_offer, conversation_history, final_price, origin, destination
+    
+    data = request.json
+    print("Received params:", data)
+    
+    # Extract necessary parameters from the received JSON
+    starting_price = float(data.get('starting_price', 0))
+    max_price = float(data.get('max_price', 0))
+    origin = data.get('origin', ORIGIN)
+    destination = data.get('destination', DESTINATION)
+    
+    # Initialize chat parameters
+    current_offer = starting_price
+    final_price = starting_price
+    conversation_history = []
+
+    # Generate initial message
+    initial_message = translate_message(get_initial_message_english(starting_price, origin, destination), target_language=LANGUAGE)
+    conversation_history.append({"role": "assistant", "content": initial_message})
+
+    # Start the chat with the model
+    response = chat("", LANGUAGE, current_offer, origin, destination, starting_price, max_price)
+    
+    return jsonify({
+        "status": "Chat initiated",
+        "initial_message": initial_message,
+        "model_response": response.message
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8080)
