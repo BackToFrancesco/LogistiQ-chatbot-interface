@@ -39,6 +39,7 @@ def chat_endpoint():
         print(f"final message: {final_message}")
         
         return_value = jsonify({
+            "message": final_message,  # Add this line
             "end_chat": True,
             "agreement_reached": True,
             "price": final_price,
