@@ -105,6 +105,11 @@ If you're not making a price offer, use null for the price_offered value:
     return prompt
 
 def chat(input_text, language, transport_cost, origin, destination, starting_price, max_price):
+    global LANGUAGE, ORIGIN, DESTINATION  # Add this line to use global variables
+    LANGUAGE = language  # Update the global LANGUAGE
+    ORIGIN = origin  # Update the global ORIGIN
+    DESTINATION = destination  # Update the global DESTINATION
+    
     conversation_history.append(HumanMessage(content=input_text))
     initial_message = get_initial_message_english(starting_price, origin, destination)
     prompt = create_prompt({

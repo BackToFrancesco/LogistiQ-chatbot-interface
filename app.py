@@ -28,14 +28,17 @@ def index():
 
 @app.route('/start_chat', methods=['POST'])
 def start_chat():
-    global starting_price, max_price, current_offer, conversation_history, final_price
+    global starting_price, max_price, current_offer, conversation_history, final_price, origin, destination, LANGUAGE
     starting_price = float(request.json['starting_price'])
     final_price = starting_price  # Set initial final_price
     max_price = float(request.json['max_price'])
+    origin = request.json.get('origin', ORIGIN)
+    destination = request.json.get('destination', DESTINATION)
+    LANGUAGE = request.json.get('language', LANGUAGE)
     current_offer = starting_price
     conversation_history = []
 
-    initial_message = translate_message(get_initial_message_english(starting_price, ORIGIN, DESTINATION), target_language=LANGUAGE)
+    initial_message = translate_message(get_initial_message_english(starting_price, origin, destination), target_language=LANGUAGE)
     conversation_history.append({"role": "assistant", "content": initial_message})
 
     return jsonify({"message": initial_message})
@@ -96,17 +99,17 @@ import threading
 
 @app.route('/receive_params', methods=['POST'])
 def receive_params():
-    global chat_completed, final_price
+    global chat_completed, final_price, starting_price, max_price, origin, destination, LANGUAGE
     data = request.json
     print("Received params:", data)
     
     # Store parameters in global variables
-    global starting_price, max_price, origin, destination
     starting_price = float(data.get('minimum_price', 0))
     max_price = float(data.get('maximum_price', 0))
     origin = data.get('load_city', ORIGIN)
     destination = data.get('unload_city', DESTINATION)
-    print(f"Starting price: {starting_price}, max price: {max_price}, origin: {origin}, destination: {destination}")
+    LANGUAGE = data.get('language', LANGUAGE)  # Update the global LANGUAGE
+    print(f"Starting price: {starting_price}, max price: {max_price}, origin: {origin}, destination: {destination}, language: {LANGUAGE}")
     
     # Reset chat_completed flag and final_price
     with chat_completed_lock:
@@ -121,6 +124,7 @@ def receive_params():
             'max_price': max_price,
             'origin': origin,
             'destination': destination,
+            'language': LANGUAGE,
             'chat_initiated': 'true'
         })
         webbrowser.open_new(f'http://localhost:8080/?{params}')
